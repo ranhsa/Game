@@ -4,7 +4,7 @@
 #Time, os, and sys used for typewriter printing
 import time,os,sys
 
-#TEST
+
 #random stuff
 from random import seed
 from random import randint
@@ -18,6 +18,7 @@ def printo(text):
 		time.sleep(0.00)
 	print("")
 	return
+
 #Typewriter printing for input line
 def printi(text):
 	for character in text:
@@ -57,6 +58,7 @@ def intro():
 def basic_stats(character):
 	printo ("\nName: " + character.name+" ["+str(character.role)+"]")
 	printo("Health: ["+str(character.health[0]) +"/"+str(character.health[1])+"]")
+	printo("Weapon: ["+str(character.weapon)+"] ("+str(character.damage[0])+"-"+str(character.damage[1])+")")
 	return 0
 	
 #Displays in depth information for any character sent to this function.
@@ -72,9 +74,63 @@ def display_stats(character):
 	printo("Strength: ["+str(character.strength) +"] provides a bonus of: ["+str(character.strength_bonus)+"] to damage.")
 	printo("Dexterity: ["+str(character.dexterity) + "] provides a bonus of: ["+str(character.dexterity_bonus)+ "%] to Critical Strike Chance.")
 	printo("(Dexterity: Also determines [Combat Order])")
-	printo("Constitution: ["+str(character.constitution) + "] provides a bonus of: ["+str(character.constitution_bonus) +"] to health.\n")
+	printo("Constitution: ["+str(character.constitution) + "] provides a bonus of: ["+str(character.constitution_bonus) +"] to health.")
+	if character.first_strike == 1:
+		printo("Special: [First Strike] in every combat")
+	if character.restoration > 0:
+		printo("Special: This character restores ["+str(character.restoration)+"] health after each battle")
+	if character.protection > 0:
+		printo("Special: Heavy Armor protects against ["+str(character.protection)+"] damage each combat")
+	
+	printo("\n")
 	return 0
-  
+ 
+def set_enemy(data):
+	class Character:
+		#Character Name
+		name = data[0]
+		#Character role
+		role = data[1]
+		#Current/Max
+		base_health  = [data[2],data[3]]
+		#Weapon Name
+		weapon = data[4]
+		#Damage has a low and high end
+		weaponD = [data[5],data[6]]
+		#Weapon Critical Strike Chance
+		weaponC = data[7]
+		
+		#Strength of character --> Damage Bonus
+		strength = data[8]
+		strength_bonus = int((strength-10)/2)
+		
+		#Dexterity of character --> Critical Strike Bonus
+		dexterity = data[9]
+		dexterity_bonus = int((dexterity-10) / 2)*10
+   
+		#Constitution of Character --> Increased Health
+		constitution = data[10]
+		constitution_bonus = int((constitution-10) / 2)
+		level = data[11]
+		
+		#Enemies have no innate protection
+		protection  = 0
+		#Apply Attributes bonuses to damage, health, and critical strike chance
+		damage = [weaponD[0]+strength_bonus,weaponD[1]+strength_bonus]
+		#Prevents damage from being lower than 0
+		if weaponD[0] < 0:
+			weaponD[0] = 0
+		
+		health = [base_health[0]+constitution_bonus,base_health[1]+constitution_bonus]
+		critical = weaponC + dexterity_bonus
+		#Prevent critical strike chance from being lower than 0%
+		if (critical < 0):
+			critical = 0
+	#Assign a player object to the class, and return
+	Player = Character() 
+	return Player
+
+ 
 #Assigns Statistics to character or enemies based on 11 input fields data[0] - data[10]
 def set_stats(data):
 	class Character:
@@ -103,7 +159,13 @@ def set_stats(data):
 		constitution = data[10]
 		constitution_bonus = int((constitution-10) / 2)
 		level = data[11]
-		description = data[12]
+		
+		first_strike = data[12]
+		restoration = data[13]
+		protection = data[14]
+		description = data[15]
+
+		
 		
 		#Apply Attributes bonuses to damage, health, and critical strike chance
 		damage = [weaponD[0]+strength_bonus,weaponD[1]+strength_bonus]
@@ -134,13 +196,16 @@ def class_selection(name):
 	printo("Below is a list of the available classes")
 	
 	#Class Definitions
-	#		   Name, Role,	 Base-HP,	Max-HP, Weapon Name,	Weapon-L,   Weapon-H,   Weapon Crit%,	Strength,   Dexterity,  Constitution,	Level
-	array[0] = [name,"Soldier", 10,		 10,	 "Broken Sword", 1,		  	4,		  	10,			 	14,		 	8,		  	12,				1]
+	#		   Name, Role,	 Base-HP,	Max-HP, Weapon Name,	Weapon-L,   Weapon-H,   Weapon Crit%,	Strength,   Dexterity,  Constitution,	Level	First Strike	Battle Meditation	Protection
+	array[0] = [name,"Soldier", 10,		 10,	 "Broken Sword", 1,		  	4,		  	10,			 	14,		 	8,		  	12,				1,		0,				4,					0]
 	array[0].append("A strong and well balanced warrior, the soldier is able to restore health between fights.")
-	array[1] = [name,"Rogue",   10,		 10,	 "Rusty Dagger", 1,		  	3,		  	30,			 	10,		 	16,		 	8,				1]
-	array[1].append("With high dexterity, the Rogue has an innate ability to attack first and deal critical blows.")
-	array[2] = [name,"Bulwark", 10,		 10,	 "Dull Axe",	 1,		  	6,		  	0,			  	12,		 	8,		  	14,				1]	
+	
+	array[1] = [name,"Rogue",   10,		 10,	 "Rusty Dagger", 1,		  	3,		  	30,			 	10,		 	16,		 	8,				1,		1,				0,					0]
+	array[1].append("The stealthy Rogue has an innate ability to always attack first.")
+	
+	array[2] = [name,"Bulwark", 10,		 10,	 "Dull Axe",	 1,		  	6,		  	0,			  	12,		 	8,		  	14,				1,		0,				0,					1]	
 	array[2].append("With heavy armor the bulwark is protected against a portion of all attacks.")
+
 	#For each Class assign statistics and display basic information
 	for i in range(class_count):
 		array[i] = set_stats(array[i])
@@ -177,13 +242,13 @@ def tier_one():
 		#			Name,			  	Role,		   Base-HP,	Max-HP,	Weapon,		 Weapon-L,   Weapon-H, 	Weapon Crit%   Strength Dexterity   Constitution	Level
 	enemy_list[0] = ["Deer",			"Beast",   		5,		  5,	"Hoof",			2,		  3,		10,			 	8,	  	10,			8,				1]
 	enemy_list[1] = ["Eagle",		  	"Beast",	  	5,		  5,	"Talon",		2,		  3,		10,			 	12,		8,			6,				1]
-	enemy_list[2] = ["Red  Wolf",		"Beast",  		3,		  5,	"Fangs",		2,		  3,		10,			 	8,	  	12,			6,				2]
+	enemy_list[2] = ["Red  Wolf",		"Beast",  		5,		  5,	"Fangs",		2,		  3,		10,			 	8,	  	12,			6,				1]
 	enemy_list[3] = ["Boar",   			"Beast",	   	5,		  5,	"Tusks",		2,		  3,		10,			 	8,	  	8,			10,				1]
 	enemy_list[4] = ["Angry Farmer",	"Human",		5,		  5,	"Pitchfork",	2,		  3,		10,			 	6,	  	6,			16,				1]
 	enemy_stats = [0]*rows  
 	#apply stats for all enemies created dynamically
 	for i in range(enemy_count):
-		enemy_stats[i] = set_stats(enemy_list[i])
+		enemy_stats[i] = set_enemy(enemy_list[i])
 	return enemy_stats
 
 def tier_two():
@@ -200,7 +265,7 @@ def tier_two():
 	enemy_stats = [0]*rows  
 	#apply stats for all enemies created dynamically
 	for i in range(enemy_count):
-		enemy_stats[i] = set_stats(enemy_list[i])
+		enemy_stats[i] = set_enemy(enemy_list[i])
 	return enemy_stats
 
 
@@ -215,7 +280,7 @@ def tier_three():
 	enemy_stats = [0]*rows  
 	#apply stats for all enemies created dynamically
 	for i in range(enemy_count):
-		enemy_stats[i] = set_stats(enemy_list[i])
+		enemy_stats[i] = set_enemy(enemy_list[i])
 	return enemy_stats
 	
 
@@ -255,10 +320,8 @@ def gameplay_selection():
 #Base function for all combat!
 def combat(Player,Enemy):
 	while 1:		
-		first_strike = attack_order(Player,Enemy)
 		#First strike we attack first
-		if first_strike:
-			printo("You have first strike this round!")
+		if Player.first_strike:
 			# (attacker,defender)
 			result = damage_calculation(Player,Enemy,1)
 			if result:
@@ -289,7 +352,7 @@ def damage_calculation(Attacker,Defender,player_attacker):
 	if (player_attacker):
 		while 1:
 			try:
-				selection = int(printi("[1] - Attack\nChoose:"))
+				selection = int(printi("[1] - Attack with ["+str(Attacker.weapon)+"] ("+str(Attacker.damage[0])+"-"+str(Attacker.damage[1])+")\nChoose:"))
 				if selection == 1:
 					break
 				printo("Invalid Input!")
@@ -306,9 +369,18 @@ def damage_calculation(Attacker,Defender,player_attacker):
 		damage = damage * 2
 		printo("Critical hit!")
 
-
-	#Display damage output from attacker
-	printo(str(Attacker.name)+" hits "+str(Defender.name)+" for: ["+str(damage)+"] Damage with: ["+str(Attacker.weapon)+"]")
+	
+	
+	#If the Defender has protection, reduce the damage (damage cannot be reduced below 0)
+	if Defender.protection > 0:
+		#Reduce Damage based on protection
+		damage = damage - Defender.protection
+		if damage < 0:
+			damage = 0
+		printo(str(Attacker.name)+" hits "+str(Defender.name)+" for: ["+str(damage)+"] Damage with: ["+str(Attacker.weapon)+"] (Protection ["+str(Defender.protection)+"] )")
+	
+	else: #Display damage output from attacker
+		printo(str(Attacker.name)+" hits "+str(Defender.name)+" for: ["+str(damage)+"] Damage with: ["+str(Attacker.weapon)+"]")
 	
 	Defender.health[0] = Defender.health[0] - damage
 	
@@ -326,7 +398,7 @@ def damage_calculation(Attacker,Defender,player_attacker):
 	#Return 0 indicates the enemy has been defeated
 	return 0
 
-#Determines who attacks first (If tie default to enemy)
+#DEPRICATED (First Strike is now a special ability, and not based on Dexterity)
 def attack_order(Player,Enemy):
 	if Player.dexterity > Enemy.dexterity:
 		return 1
