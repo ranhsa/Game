@@ -4,6 +4,7 @@
 #Time, os, and sys used for typewriter printing
 import time,os,sys
 
+#TEST
 #random stuff
 from random import seed
 from random import randint
