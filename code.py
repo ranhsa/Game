@@ -360,9 +360,21 @@ def basic_stats(character):
 	printo("Weapon: ["+str(character.weapon)+"] ("+str(character.damage[0])+"-"+str(character.damage[1])+")")
 	return 0
 
-	
+def combat_order(Player, Enemy):
+	if Player.first_strike == 1:
+		return 1
+	return 0
+
+#Based on first strike, loops each player back and 
+#forth until someone is dead
 def combat(Player,Enemy):
-	while 1:		
+	while 1:
+		order = combat_order(Player, Enemy)
+		
+		
+		#enemy Attacks First
+		else:
+			
 		#First strike we attack first
 		if Player.first_strike:
 			# (attacker,defender)
@@ -383,8 +395,6 @@ def combat(Player,Enemy):
 	return 0
 
 
-	
-	
 #Heal character after combat if they have restoration
 def restoration(Player):
 	Player.health[0] = Player.health[0] + Player.restoration
@@ -394,11 +404,10 @@ def restoration(Player):
 	os.system('pause')
 	return Player
 
-#Base function for all combat!
 
 
  
- #Calculates damaged based on attacker stats
+#Calculates damaged based on attacker stats
 def damage_calculation(Attacker,Defender,player_attacker):
 	printo("\n")
 	printo(Attacker.name+"'s turn...")
