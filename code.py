@@ -29,7 +29,7 @@ def printi(text):
 	return value  
 
 #Clear screen 
-def clearScreen():
+def clear_screen():
   os.system("cls")
 
 #Initial screen display
@@ -45,10 +45,10 @@ def character_name():
 		#pick a name
 		
 		name = str(printi("Please Enter a Character Name: "))
-		confirm = printi("Are you sure you want to be named: "+name+"? (y/n): ")
+		confirm = printi("Are you sure you want to be named: ["+name+"] (y/n): ")
 		
 		if str(confirm) == "y" or str(confirm) == "Y":
-			clearScreen()
+			clear_screen()
 			return name
 		elif str(confirm) == "n" or str(confirm) == "N":
 			printo("You may choose another name!")
@@ -66,8 +66,6 @@ def class_selection(name):
 	rows, cols = (class_count, 11)
 	array = [[0]*cols]*rows	
 	
-	printo("Below is a list of the available classes")
-	
 	#Class Definitions
 	#		   Name, Role,	 Base-HP,	Max-HP, Weapon Name,	Weapon-L,   Weapon-H,   Weapon Crit%,	Strength,   Dexterity,  Constitution,	Level	First Strike	Restoration	Protection
 	array[0] = [name,"Soldier", 10,		 10,	 "Broken Sword", 1,		  	4,		  	10,			 	14,		 	8,		  	12,				1,		0,				4,					0]
@@ -84,26 +82,29 @@ def class_selection(name):
 		array[i] = set_stats(array[i])
    
 	#Loop until a class is chosen
-	while 1:  
+	while 1: 
+		clear_screen()
 		printo("\n---CLASS SELECTION SCREEN---")
 		#Display the names of each class for input
 		for i in range(class_count):
-			printo("["+str(i+1)+"]= "+array[i].role +"\n"+array[i].description+"\n")
+			printo("["+str(i+1)+"]=["+array[i].role +"]\n"+array[i].description+"\n")
 		#Using a try except to catch invalid input from user
 		try:
 			choice =int(printi("Select a class for in depth statistics: "))
 			if choice <= class_count and choice >0:
 				display_stats(array[choice-1])
-				choice2 = printi("[1] - Confirm selection of class: ["+str(array[choice-1].role)+"]\n[2] - View List of Classes\n-->:")
+				choice2 = printi("[1] - Confirm selection of class: ["+str(array[choice-1].role)+"]\n[2] - Return to List of Classes\n-->:")
 				if str(choice2) != "1":
 					continue
-				clearScreen()
+				clear_screen()
 				return array[choice-1]
 			else:
 				printo("Invalid Input!\n")
+				os.system("pause")
 				continue
 		except ValueError as e:
 			printo( "Invalid Input!\n")
+			os.system("pause")
 			continue
 	
 	#This line should not be reachable
@@ -111,17 +112,18 @@ def class_selection(name):
 	
 #Displays in depth information for any character sent to this function.
 def display_stats(character):
-	printo ("\nName: " + character.name)
-	printo ("Level: "+str(character.level))
-	printo ("Role: " + (character.role))
+	clear_screen()
+	printo("---DETAILED-STATISTICS---")
+	printo ("\nName: [" + character.name+"]")
+	printo ("Level: ["+str(character.level)+"]")
+	printo ("Role: [" + (character.role)+"]")
 	printo("Health: ["+str(character.health[0]) +"/"+str(character.health[1])+"]")
 	printo("Weapon: ["+str(character.weapon) +"] ( Base Crit: ["+str(character.weaponC)+"%] )")
 	printo("Base Damage: ["+str(character.weaponD[0])+"-"+str(character.weaponD[1])+"]")
 	printo("Bonus Damage: ["+str(character.strength_bonus)+"]")
-	printo("Critical Strike Chance: "+str(character.critical)+"%")
+	printo("Critical Strike Chance: ["+str(character.critical)+"%]")
 	printo("Strength: ["+str(character.strength) +"] provides a bonus of: ["+str(character.strength_bonus)+"] to damage.")
 	printo("Dexterity: ["+str(character.dexterity) + "] provides a bonus of: ["+str(character.dexterity_bonus)+ "%] to Critical Strike Chance.")
-	printo("(Dexterity: Also determines [Combat Order])")
 	printo("Constitution: ["+str(character.constitution) + "] provides a bonus of: ["+str(character.constitution_bonus) +"] to health.")
 	if character.first_strike == 1:
 		printo("Special: [First Strike] in every combat")
@@ -130,6 +132,8 @@ def display_stats(character):
 	if character.protection > 0:
 		printo("Special: Heavy Armor protects against ["+str(character.protection)+"] damage each combat")
 	
+	if character.tower_level > 0:
+		printo("You achieved floor level: ["+str(character.tower_level)+"]")
 	printo("\n")
 	return 0
  #Assigns Statistics to character or enemies based on 11 input fields data[0] - data[10]
@@ -165,8 +169,8 @@ def set_stats(data):
 		restoration = data[13]
 		protection = data[14]
 		description = data[15]
-
-		
+		is_player = True
+		tower_level = 0
 		
 		#Apply Attributes bonuses to damage, health, and critical strike chance
 		damage = [weaponD[0]+strength_bonus,weaponD[1]+strength_bonus]
@@ -187,7 +191,7 @@ def set_stats(data):
 #select between Story Mode or Tower Mode
 def gameplay_selection():  
 	while 1:
-		printo("You're adventure begins! Choose a gameplay mode.")
+		printo("---CHOOSE A GAMEPLAY MODE---")
 		try:
 			choice = int(printi("[1] - Tower Mode  \n[2] - Story Mode\n-->:"))
 			if choice == 1 or choice == 2:
@@ -201,40 +205,42 @@ def gameplay_selection():
 
 #Tower mode, fight waves of enemies until you die
 def tower_mode(Player):
-	clearScreen()
+	clear_screen()
 	printo("---WELCOME TO TOWER MODE---")
 	printo("In this mode, you will climb the tower.")
 	printo("As you ascend, you will face stronger enemies")
 	printo("How far can you go? good luck!\n")
 	os.system('pause')
 	
-	Tower_Level = 1
+	Player.tower_level = 1
 	
 	while 1:
 		#Select an enemy based on tower level
-		Enemy = enemy_selection(Tower_Level)  
+		Enemy = enemy_selection(Player.tower_level)  
 
 
 		#Displays information about the character
 		#display_stats(Player)
-		clearScreen()
-		printo("---ENEMY #"+str(Tower_Level)+"---")
+		clear_screen()
+		printo("---Tower Level: ["+str(Player.tower_level)+"]---")
 		basic_stats(Enemy)
-		
-		printo("\n---YOUR STATS---")
+
 		basic_stats(Player)
 		
 		os.system('pause')
 		
 		#perform combat
-		combat(Player,Enemy)
+		attack_order(Player,Enemy)
 		
-		#If Tower Level = 10 win
-		if Tower_Level == 10:
-			victory_screen()
+		#After combat is over, End of combat actions take place
+		combat_end(Player,Enemy)
+		
+		#If Tower Level = 10 the player wins
+		if Player.tower_level == 10:
+			victory_screen(Player)
 			
 		#increase tower level following each victory
-		Tower_Level += 1
+		Player.tower_level += 1
 	return 0
  
 #Starting point for the game (Not implemented yet)
@@ -338,6 +344,9 @@ def set_enemy(data):
 		constitution_bonus = int((constitution-10) / 2)
 		level = data[11]
 		
+		#Enemies are not the player
+		is_player = False
+		
 		#Enemies have no innate protection
 		protection  = 0
 		#Apply Attributes bonuses to damage, health, and critical strike chance
@@ -357,40 +366,45 @@ def set_enemy(data):
 
 #Displays basic infomration about a character (Used in Tower mode for enemies)
 def basic_stats(character):
-	printo ("\nName: " + character.name+" ["+str(character.role)+"]")
+	printo ("\n["+character.name+"] ["+str(character.role)+"]")
 	printo("Health: ["+str(character.health[0]) +"/"+str(character.health[1])+"]")
 	printo("Weapon: ["+str(character.weapon)+"] ("+str(character.damage[0])+"-"+str(character.damage[1])+")")
 	return 0
 
-def combat_order(Player, Enemy):
-	if Player.first_strike == 1:
-		return 1
-	return 0
 
 #Based on first strike, loops each player back and 
 #forth until someone is dead
-def combat(Player,Enemy):
+def attack_order(Player,Enemy):
 
-	result = 1
-	while result:
+	#When result is 0, the enemy has been defeated
+	end_of_combat = False
+	while end_of_combat == False:
 	
-		#First strike we attack first
+		#If the player has first strike, they attack first
 		if Player.first_strike:
-			# (attacker,defender)
-			
-			result = damage_calculation(Player,Enemy,1)
-			result = damage_calculation(Enemy,Player,0)
+			# (attacker,defender)			
+			end_of_combat = attack(Player,Enemy)
+			end_of_combat = attack(Enemy,Player)
 			   
 			#Else, enemy attacks first
 		else:
-			result = damage_calculation(Enemy,Player,0)
-			result = damage_calculation(Player,Enemy,1)
-
+			end_of_combat = attack(Enemy,Player)
+			end_of_combat = attack(Player,Enemy)
 	
-	restoration(Player)	
-		
 	return 0
+#Defines actions that take place after combat finishes
 
+
+def combat_end(Player,Enemy):
+	clear_screen()
+	printo("---Combat is Over---")
+	printo(Player.name+" ["+str(Player.health[0])+"] / ["+str(Player.health[1])+"]")
+	#If applicable, restore health to player
+	restoration(Player)
+	
+	os.system("pause")
+	return 0
+	
 
 #Heal character after combat if they have restoration
 def restoration(Player):
@@ -399,96 +413,148 @@ def restoration(Player):
 		if Player.health[0] > Player.health[1]:
 			Player.health[0] = Player.health[1]
 		printo("\n"+str(Player.name)+"'s natural healing takes effect")
-		printo(str(Player.name)+" has restored: ["+str(Player.restoration)+"] health.")
-		printo(str(Player.name)+" now has ["+str(Player.health[0])+"] / ["+str(Player.health[1])+"]")
-		os.system('pause')
+		printo(str(Player.name)+" has restored: ["+str(Player.restoration)+"] Health.")
+		printo(str(Player.name)+": ["+str(Player.health[0])+"] / ["+str(Player.health[1])+"] Health")
 	return Player
 
 
-
+def combat_selection(Attacker,Defender):
+	while 1:
+		try:
+			printo("[1] - Attack with ["+str(Attacker.weapon)+"] ("+str(Attacker.damage[0])+"-"+str(Attacker.damage[1])+")")
+			printo("[2] - Wait")
+			selection = int(printi("Choose:"))
+			if selection == 1:
+				return 1
+			if selection == 2:
+				return 2
+			printo("Invalid Input!")
+		except ValueError as e:
+			printo("Invalid Input!\n")
+			continue
+	
+	return 0
+ 
+#If the player has 0 health, the game is over
+def game_over_check(Attacker,Defender):
+	if (Defender.health[0] <= 0 and Defender.is_player == True):
+		clear_screen()
+		printo("You have died.")
+		printo("Your adventure ends here...")
+		os.system("pause")
+		display_stats(Defender)
+		sys.exit()
+		
+	if (Attacker.health[0] <= 0 and Attacker.is_player == True):
+		clear_screen()
+		printo("You have died.")
+		printo("Your adventure ends here...")
+		display_stats(Attacker)
+		sys.exit()
+	return 0
+ 
  
 #Calculates damaged based on attacker stats
-def damage_calculation(Attacker,Defender,player_attacker):
+def attack(Attacker,Defender):
 	
-	#If the attacker is dead they cannot attack now can they...
+	#Attacker cannot respond if they are dead
 	if Attacker.health[0] <= 0:
 		return
 	
+	#Header for Attacking function
 	printo("\n")
-	printo(Attacker.name+"'s turn...")
+	printo("---"+Attacker.name+"'s Turn---")
 	
-	if (player_attacker):
-		while 1:
-			try:
-				selection = int(printi("[1] - Attack with ["+str(Attacker.weapon)+"] ("+str(Attacker.damage[0])+"-"+str(Attacker.damage[1])+")\nChoose:"))
-				if selection == 1:
-					break
-				printo("Invalid Input!")
-			except ValueError as e:
-				printo("Invalid Input!\n")
-				continue
-		
-	#Calculate damage based on random range between low and high end 
-	damage = randint(Attacker.damage[0],Attacker.damage[1])
+	#Player selects their attack type
+	if Attacker.is_player == True:
+		selection = combat_selection(Attacker,Defender)
 	
-	#Roll a D100 to determine if a crit is rolled (if so, double the damage)
-	critical = randint(1,100)
-	if critical > 100 - Attacker.critical:
-		damage = damage * 2
-		printo("Critical hit!")
+	#Enemy Selection is chosen randomly
+	else:
+		selection = 1	
+	
+	#Basic Attack Calculation
+	if selection == 1:
+		#Calculate damage based on random range between low and high end 
+		end_of_combat = basic_attack(Attacker,Defender)
+		return end_of_combat
+	
+	elif selection == 2:
+		printo("You choose to skip your turn")
+		return False
 
-	
-	
-	#If the Defender has protection, reduce the damage (damage cannot be reduced below 0)
+	#should not reach this line
+	return False
+
+
+#Display's the damage from combat to the screen
+def damage_display(Attacker,Defender,damage):
+	printo(str(Attacker.name)+" hits "+str(Defender.name)+" for: ["+str(damage)+"] Damage with: ["+str(Attacker.weapon)+"]")
+	printo(str(Defender.name)+" now has: ["+str(Defender.health[0])+"] / ["+str(Defender.health[1])+"]")
+	os.system("pause")
+	return 0
+
+#Apply damage to the defending player's health
+def damage_apply(Attacker,Defender, damage):
+	Defender.health[0] = Defender.health[0] - damage
+	#return 0 if Defender has died
+	if Defender.health[0] <= 0:
+		return True
+	return False
+
+def protection(Attacker, Defender, damage):
 	if Defender.protection > 0:
 		#Reduce Damage based on protection
 		damage = damage - Defender.protection
 		if damage < 0:
 			damage = 0
-		printo(str(Attacker.name)+" hits "+str(Defender.name)+" for: ["+str(damage)+"] Damage with: ["+str(Attacker.weapon)+"] (Protection ["+str(Defender.protection)+"] )")
+	return damage
+
+def critical_hit(Attacker, Defender, damage):
+	critical = randint (1,100)
+	if critical > 100 - Attacker.critical:
+		printo("Critical hit!")
+		return damage * 2
+	return damage
+
+
+def basic_attack(Attacker, Defender):
 	
-	else: #Display damage output from attacker
-		printo(str(Attacker.name)+" hits "+str(Defender.name)+" for: ["+str(damage)+"] Damage with: ["+str(Attacker.weapon)+"]")
+	#Base Damage based on damage range
+	damage = randint(Attacker.damage[0],Attacker.damage[1])
+
+	#Apply Attacker Critical Strike
+	damage = critical_hit(Attacker, Defender, damage)
 	
-	Defender.health[0] = Defender.health[0] - damage
+	#Apply Defender protection
+	damage = protection(Attacker, Defender,damage)
 	
-	#Display how much health the defender has left
-	printo(str(Defender.name)+" now has: ["+str(Defender.health[0])+"] / ["+str(Defender.health[1])+"]")
-	os.system("pause")
-   
-	if Defender.health[0] <= 0:
-		printo(Defender.name+" Has been defeated!")
-		
-		#If the player is not the attacker, they just died.
-		if player_attacker == 0:
-			gameover()
-			
-		#enemy has been defeated
-		return 0
-	#Return 1 indicates the enemy is still alive
-	return 1
-
-
-
-
-
-#Runs on death of the main character
-def gameover():
-	printo("You have died.")
-	printo("Your adventure ends here...")
-	sys.exit()
+	#Removes health from Defender based on attack damage
+	#If combat is over it will return True
+	end_of_combat = damage_apply(Attacker, Defender, damage)
 	
-	return 0
+	#Display's damage output to the screen
+	damage_display(Attacker, Defender, damage)
+	
+	game_over_check(Attacker,Defender)
+	return end_of_combat
 
-def victory_screen():
-	clearScreen()
+
+
+def victory_screen(Player):
+	clear_screen()
 	printo("You've ascended to the top of the tower.")
 	printo("Victory is yours!")
+	display_stats (Player)
 	sys.exit()
 	return 0
   
 #Main is the hub that calls other functions to start the game   
 def main(): 
+
+	#Clear the screen before the game starts
+	clear_screen()
+	
 	#Display intro screen
 	intro()
 	
