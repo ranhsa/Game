@@ -105,7 +105,9 @@ def class_selection(name):
 		except ValueError as e:
 			printo( "Invalid Input!\n")
 			continue
- 
+	
+	#This line should not be reachable
+	return 0
 	
 #Displays in depth information for any character sent to this function.
 def display_stats(character):
@@ -368,27 +370,22 @@ def combat_order(Player, Enemy):
 #Based on first strike, loops each player back and 
 #forth until someone is dead
 def combat(Player,Enemy):
-	while 1:
-		order = combat_order(Player, Enemy)
-		
-		
-		#enemy Attacks First
-		else:
-			
+
+	result = 1
+	while result:
+	
 		#First strike we attack first
 		if Player.first_strike:
 			# (attacker,defender)
+			
 			result = damage_calculation(Player,Enemy,1)
-			if result:
-				break
-			damage_calculation(Enemy,Player,0)
+			result = damage_calculation(Enemy,Player,0)
 			   
 			#Else, enemy attacks first
 		else:
-			damage_calculation(Enemy,Player,0)
+			result = damage_calculation(Enemy,Player,0)
 			result = damage_calculation(Player,Enemy,1)
-			if result:
-				break
+
 	
 	restoration(Player)	
 		
@@ -397,11 +394,14 @@ def combat(Player,Enemy):
 
 #Heal character after combat if they have restoration
 def restoration(Player):
-	Player.health[0] = Player.health[0] + Player.restoration
-	if Player.health[0] > Player.health[1]:
-		Player.health[0] = Player.health[1]
-	printo(str(Player.name)+" has restored: ["+str(Player.restoration)+"] health.")
-	os.system('pause')
+	if Player.restoration > 0:
+		Player.health[0] = Player.health [0] + Player.restoration
+		if Player.health[0] > Player.health[1]:
+			Player.health[0] = Player.health[1]
+		printo("\n"+str(Player.name)+"'s natural healing takes effect")
+		printo(str(Player.name)+" has restored: ["+str(Player.restoration)+"] health.")
+		printo(str(Player.name)+" now has ["+str(Player.health[0])+"] / ["+str(Player.health[1])+"]")
+		os.system('pause')
 	return Player
 
 
@@ -409,6 +409,11 @@ def restoration(Player):
  
 #Calculates damaged based on attacker stats
 def damage_calculation(Attacker,Defender,player_attacker):
+	
+	#If the attacker is dead they cannot attack now can they...
+	if Attacker.health[0] <= 0:
+		return
+	
 	printo("\n")
 	printo(Attacker.name+"'s turn...")
 	
@@ -457,9 +462,11 @@ def damage_calculation(Attacker,Defender,player_attacker):
 		#If the player is not the attacker, they just died.
 		if player_attacker == 0:
 			gameover()
-		return 1
-	#Return 0 indicates the enemy has been defeated
-	return 0
+			
+		#enemy has been defeated
+		return 0
+	#Return 1 indicates the enemy is still alive
+	return 1
 
 
 
