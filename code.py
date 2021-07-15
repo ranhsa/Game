@@ -1,11 +1,10 @@
 #HEADER
 #Created by: Scott Russell
 #Practicing my python (Small game example)
+
 #Time, os, and sys used for typewriter printing
 import time,os,sys
-
-
-#random stuff
+#random Seed imports
 from random import seed
 from random import randint
 import random
@@ -57,7 +56,6 @@ def character_name():
 			
 #Contains list of player classes, and provides input for selection
 def class_selection(name):
-	
 	#IMPORTANT: To change the # of character classes simply chang the class_count variable
 	# You must also add/remove a line from the class Defintions array below. That's it!
 	class_count = 3
@@ -68,13 +66,13 @@ def class_selection(name):
 	
 	#Class Definitions
 	#		   Name, Role,	 Base-HP,	Max-HP, Weapon Name,	Weapon-L,   Weapon-H,   Weapon Crit%,	Strength,   Dexterity,  Constitution,	Level	First Strike	Restoration	Protection
-	array[0] = [name,"Soldier", 10,		 10,	 "Broken Sword", 1,		  	4,		  	10,			 	14,		 	8,		  	12,				1,		0,				4,					0]
+	array[0] = [name,"Soldier", 20,		 20,	 "Broken Sword", 1,		  	4,		  	10,			 	5,		 	5,		  	5,				1,		0,				2,					0]
 	array[0].append("A strong and well balanced warrior, the soldier is able to restore health between fights.")
 	
-	array[1] = [name,"Rogue",   10,		 10,	 "Rusty Dagger", 1,		  	3,		  	30,			 	10,		 	16,		 	8,				1,		1,				0,					0]
+	array[1] = [name,"Rogue",   20,		 20,	 "Rusty Dagger", 1,		  	4,		  	30,			 	5,		 	5,		 	5,				1,		1,				0,					0]
 	array[1].append("The stealthy Rogue has an innate ability to always attack first.")
 	
-	array[2] = [name,"Bulwark", 10,		 10,	 "Dull Axe",	 1,		  	6,		  	0,			  	12,		 	8,		  	14,				1,		0,				0,					1]	
+	array[2] = [name,"Bulwark", 20,		 20,	 "Dull Axe",	 1,		  	4,		  	0,			  	5,		 	5,		  	5,				1,		0,				0,					1]	
 	array[2].append("With heavy armor the bulwark is protected against a portion of all attacks.")
 
 	#For each Class assign statistics and display basic information
@@ -115,7 +113,7 @@ def display_stats(character):
 	clear_screen()
 	printo("---DETAILED-STATISTICS---")
 	printo ("\nName: [" + character.name+"]")
-	printo ("Level: ["+str(character.level)+"]")
+	printo ("Level: ["+str(character.level)+"] Experience: ["+str(character.experience)+"/"+str(character.experience_to_level[character.level])+"]")
 	printo ("Role: [" + (character.role)+"]")
 	printo("Health: ["+str(character.health[0]) +"/"+str(character.health[1])+"]")
 	printo("Weapon: ["+str(character.weapon) +"] ( Base Crit: ["+str(character.weaponC)+"%] )")
@@ -133,9 +131,10 @@ def display_stats(character):
 		printo("Special: Heavy Armor protects against ["+str(character.protection)+"] damage each combat")
 	
 	if character.tower_level > 0:
-		printo("You achieved floor level: ["+str(character.tower_level)+"]")
+		printo("Tower Level: ["+str(character.tower_level)+"]")
 	printo("\n")
 	return 0
+ 
  #Assigns Statistics to character or enemies based on 11 input fields data[0] - data[10]
 def set_stats(data):
 	class Character:
@@ -144,7 +143,7 @@ def set_stats(data):
 		#Character role
 		role = data[1]
 		#Current/Max
-		base_health  = [data[2],data[3]]
+		base_health  = data[2],data[3]
 		#Weapon Name
 		weapon = data[4]
 		#Damage has a low and high end
@@ -154,17 +153,18 @@ def set_stats(data):
 		
 		#Strength of character --> Damage Bonus
 		strength = data[8]
-		strength_bonus = int((strength-10)/2)
+		strength_bonus = int(strength-5)
 		
 		#Dexterity of character --> Critical Strike Bonus
 		dexterity = data[9]
-		dexterity_bonus = int((dexterity-10) / 2)*10
+		dexterity_bonus = int(dexterity-5)*10
    
 		#Constitution of Character --> Increased Health
 		constitution = data[10]
-		constitution_bonus = int((constitution-10) / 2)
+		constitution_bonus = int(constitution-5)
 		level = data[11]
 		
+		#First strike players always attack first
 		first_strike = data[12]
 		restoration = data[13]
 		protection = data[14]
@@ -172,6 +172,11 @@ def set_stats(data):
 		is_player = True
 		tower_level = 0
 		
+		#player starts with 0 experiencre
+		experience = 0
+		
+		#break points for experience to level up
+		experience_to_level = [0,5,10,15,20,25,30]
 		#Apply Attributes bonuses to damage, health, and critical strike chance
 		damage = [weaponD[0]+strength_bonus,weaponD[1]+strength_bonus]
 		#Prevents damage from being lower than 0
@@ -186,7 +191,6 @@ def set_stats(data):
 	#Assign a player object to the class, and return
 	Player = Character() 
 	return Player
-
 
 #select between Story Mode or Tower Mode
 def gameplay_selection():  
@@ -223,9 +227,9 @@ def tower_mode(Player):
 		#display_stats(Player)
 		clear_screen()
 		printo("---Tower Level: ["+str(Player.tower_level)+"]---")
-		basic_stats(Enemy)
+		combat_stats(Enemy)
 
-		basic_stats(Player)
+		combat_stats(Player)
 		
 		os.system('pause')
 		
@@ -273,11 +277,11 @@ def tier_one():
 	enemy_list = [[0]*cols]*rows  
 	
 		#			Name,			  	Role,		   Base-HP,	Max-HP,	Weapon,		 Weapon-L,   Weapon-H, 	Weapon Crit%   Strength Dexterity   Constitution	Level
-	enemy_list[0] = ["Deer",			"Beast",   		5,		  5,	"Hoof",			2,		  3,		10,			 	8,	  	10,			8,				1]
-	enemy_list[1] = ["Eagle",		  	"Beast",	  	5,		  5,	"Talon",		2,		  3,		10,			 	12,		8,			6,				1]
-	enemy_list[2] = ["Red  Wolf",		"Beast",  		5,		  5,	"Fangs",		2,		  3,		10,			 	8,	  	12,			6,				1]
-	enemy_list[3] = ["Boar",   			"Beast",	   	5,		  5,	"Tusks",		2,		  3,		10,			 	8,	  	8,			10,				1]
-	enemy_list[4] = ["Angry Farmer",	"Human",		5,		  5,	"Pitchfork",	2,		  3,		10,			 	6,	  	6,			16,				1]
+	enemy_list[0] = ["Deer",			"Beast",   		3,		  3,	"Hoof",			2,		  3,		20,			 	4,	  	4,			6,				1]
+	enemy_list[1] = ["Eagle",		  	"Beast",	  	3,		  3,	"Talon",		2,		  3,		20,			 	6,		6,			3,				1]
+	enemy_list[2] = ["Red  Wolf",		"Beast",  		3,		  3,	"Fangs",		2,		  3,		20,			 	5,	  	5,			5,				1]
+	enemy_list[3] = ["Boar",   			"Beast",	   	3,		  3,	"Tusks",		2,		  3,		20,			 	4,	  	5,			7,				1]
+	enemy_list[4] = ["Rabbit",			"Beast",		3,		  3,	"Teeth",		2,		  3,		20,			 	5,	  	7,			3,				1]
 	enemy_stats = [0]*rows  
 	#apply stats for all enemies created dynamically
 	for i in range(enemy_count):
@@ -289,12 +293,12 @@ def tier_two():
 	rows, cols = (enemy_count, 11)
 	enemy_list = [[0]*cols]*rows  
 	
-		#			Name,			  	Role,		   	Base-HP,	Max-HP,	 	Weapon,		 Weapon-L,   Weapon-H,	   Weapon Crit%   Strength Dexterity   Constitution Level
-	enemy_list[0] = ["Red Wolf",		"Elemental",	5,		  	5,		  	"Fangs",		1,		  2,			  20,			 10,	 10,		 10,		1]
-	enemy_list[1] = ["Goblin",		  	"Warrior",	  	2,		  	2,		 	"Rusty Dagger", 1,		  1,			  10,			 10,	 10,		 10,		1]
-	enemy_list[2] = ["Injured Wolf",	"Pack Leader",  3,		  	6,		  	"Bite",		 	2,		  4,			  50,			 10,	 10,		 10,		1]
-	enemy_list[3] = ["Angry Peasent",   "Farmer",	   	5,		  	5,		  	"Pitchfork",	1,		  1,			  10,			 10,	 10,		 10,		1]
-	enemy_list[4] = ["Big Pig",		 	"Swine",		2,		  	2,		  	"Tusks",		1,		  2,			  10,			 10,	 10,		 10,		1]
+		#			Name,			  	Role,		   	Base-HP,	Max-HP,	 	Weapon,		 Weapon-L,   Weapon-H, Weapon Crit%   Strength Dexterity Constitution Level
+	enemy_list[0] = ["Gate Guard",		"Human",		5,		  	5,		  	"Rusty Sword",	3,		  5,		20,			 	8,	 	5,		 	7,		2]
+	enemy_list[1] = ["Archer",		  	"Human",	  	5,		  	5,		 	"Longbow", 		3,		  5,		20,			 	4,	 	12,		 	4,		2]
+	enemy_list[2] = ["Pikeman",			"Human",  		5,		  	5,		  	"Pike",		 	3,		  5,		20,			 	5,	 	5,		 	5,		2]
+	enemy_list[3] = ["Templar",   		"Human",	   	5,		  	5,		  	"Mace",			3,		  5,		20,			 	6,	 	6,			8,		2]
+	enemy_list[4] = ["King's Guard",	"Human",		5,		  	5,		  	"Claymore",		3,		  5,		20,			 	10,	 	5,		 	5,		2]
 	enemy_stats = [0]*rows  
 	#apply stats for all enemies created dynamically
 	for i in range(enemy_count):
@@ -307,7 +311,7 @@ def tier_three():
 	enemy_list = [[0]*cols]*rows  
 	
 		#			Name,			  			Role,		   	Base-HP,	Max-HP,	 	Weapon,		 Weapon-L,   Weapon-H,	   Weapon Crit%   Strength Dexterity   Constitution Level
-	enemy_list[0] = ["The Black Knight",		"Demon",		20,		  	20,		  	"Halburk",		5,		  10,			  20,			 16,	 16,		 16,		5]
+	enemy_list[0] = ["The Black Knight",		"Demon",		10,		  	10,		  	"Halburk",		3,		  6,			  20,			 10,	 10,		 	10,			3]
 
 	enemy_stats = [0]*rows  
 	#apply stats for all enemies created dynamically
@@ -333,15 +337,15 @@ def set_enemy(data):
 		
 		#Strength of character --> Damage Bonus
 		strength = data[8]
-		strength_bonus = int((strength-10)/2)
+		strength_bonus = int(strength-5)
 		
 		#Dexterity of character --> Critical Strike Bonus
 		dexterity = data[9]
-		dexterity_bonus = int((dexterity-10) / 2)*10
+		dexterity_bonus = int(dexterity-5)*10
    
 		#Constitution of Character --> Increased Health
 		constitution = data[10]
-		constitution_bonus = int((constitution-10) / 2)
+		constitution_bonus = int(constitution-5)
 		level = data[11]
 		
 		#Enemies are not the player
@@ -365,12 +369,11 @@ def set_enemy(data):
 	return Player
 
 #Displays basic infomration about a character (Used in Tower mode for enemies)
-def basic_stats(character):
-	printo ("\n["+character.name+"] ["+str(character.role)+"]")
+def combat_stats(character):
+	printo ("\n["+character.name+"] ["+str(character.role)+"] Level: ["+str(character.level)+"]")
 	printo("Health: ["+str(character.health[0]) +"/"+str(character.health[1])+"]")
-	printo("Weapon: ["+str(character.weapon)+"] ("+str(character.damage[0])+"-"+str(character.damage[1])+")")
+	printo("Weapon: ["+str(character.weapon)+"] ["+str(character.weaponD[0])+"-"+str(character.weaponD[1])+"] Bonus: ["+str(character.strength_bonus)+"]")
 	return 0
-
 
 #Based on first strike, loops each player back and 
 #forth until someone is dead
@@ -392,20 +395,22 @@ def attack_order(Player,Enemy):
 			end_of_combat = attack(Player,Enemy)
 	
 	return 0
+
 #Defines actions that take place after combat finishes
-
-
 def combat_end(Player,Enemy):
 	clear_screen()
 	printo("---Combat is Over---")
-	printo(Player.name+" ["+str(Player.health[0])+"] / ["+str(Player.health[1])+"]")
+	printo(Enemy.name+" has been defeated!")
+	experience(Player, Enemy)
+	
 	#If applicable, restore health to player
 	restoration(Player)
-	
 	os.system("pause")
+	display_stats(Player)
+	os.system("pause")
+	
 	return 0
 	
-
 #Heal character after combat if they have restoration
 def restoration(Player):
 	if Player.restoration > 0:
@@ -414,10 +419,10 @@ def restoration(Player):
 			Player.health[0] = Player.health[1]
 		printo("\n"+str(Player.name)+"'s natural healing takes effect")
 		printo(str(Player.name)+" has restored: ["+str(Player.restoration)+"] Health.")
-		printo(str(Player.name)+": ["+str(Player.health[0])+"] / ["+str(Player.health[1])+"] Health")
+		printo(str(Player.name)+": ["+str(Player.health[0])+"/"+str(Player.health[1])+"] Health")
 	return Player
 
-
+#Player chooses their action during combat
 def combat_selection(Attacker,Defender):
 	while 1:
 		try:
@@ -453,7 +458,6 @@ def game_over_check(Attacker,Defender):
 		sys.exit()
 	return 0
  
- 
 #Calculates damaged based on attacker stats
 def attack(Attacker,Defender):
 	
@@ -486,7 +490,6 @@ def attack(Attacker,Defender):
 	#should not reach this line
 	return False
 
-
 #Display's the damage from combat to the screen
 def damage_display(Attacker,Defender,damage):
 	printo(str(Attacker.name)+" hits "+str(Defender.name)+" for: ["+str(damage)+"] Damage with: ["+str(Attacker.weapon)+"]")
@@ -502,6 +505,23 @@ def damage_apply(Attacker,Defender, damage):
 		return True
 	return False
 
+def level_up(Player):
+	printo("---LEVEL UP!---")
+	Player.level += 1
+	return 0
+
+#Gain experience after combat based on enemy defeated
+def experience(Player, Enemy):
+	Player.experience += Enemy.level
+	printo("Experience gain: +["+str(Enemy.level)+"]")
+	printo("Experience: ["+str(Player.experience)+"/"+str(Player.experience_to_level[Player.level])+"]")
+	if (Player.experience >= Player.experience_to_level[Player.level]):
+		Player.experience = Player.experience - Player.experience_to_level[Player.level]
+		level_up(Player)
+
+	return 0
+
+#Applies protection to combat 
 def protection(Attacker, Defender, damage):
 	if Defender.protection > 0:
 		#Reduce Damage based on protection
@@ -510,6 +530,7 @@ def protection(Attacker, Defender, damage):
 			damage = 0
 	return damage
 
+#Calculates if a critical hit occurs
 def critical_hit(Attacker, Defender, damage):
 	critical = randint (1,100)
 	if critical > 100 - Attacker.critical:
@@ -517,7 +538,7 @@ def critical_hit(Attacker, Defender, damage):
 		return damage * 2
 	return damage
 
-
+#Performs a basic weapon attack based on damage range
 def basic_attack(Attacker, Defender):
 	
 	#Base Damage based on damage range
@@ -539,8 +560,7 @@ def basic_attack(Attacker, Defender):
 	game_over_check(Attacker,Defender)
 	return end_of_combat
 
-
-
+#If the player has defeated all levels of the tower
 def victory_screen(Player):
 	clear_screen()
 	printo("You've ascended to the top of the tower.")
@@ -577,4 +597,4 @@ def main():
 	
 #Call main to begin the game (Set random seed for randomness!)
 seed(time.time())
-main()
+main( )
